@@ -14,6 +14,10 @@ import 'firebase/compat/firestore';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+const fs = require('browserify-fs');
+
+const NewsAPI = require('newsapi');
+const newsapi = new NewsAPI('5db6ce66de334330a7a6f964e1726075', { corsProxyUrl: 'https://cors-anywhere.herokuapp.com/' });
 
 firebase.initializeApp({
   apiKey: "AIzaSyDh04dx7PFxnS3-7jE-4GGwkAElf2FWWL4",
@@ -35,6 +39,28 @@ const firestore = firebase.firestore()
 
 function App() {
   const [user] = useAuthState(auth);
+  newsapi.v2.everything({
+    sources: 'bbc-news,the-verge',
+    domains: 'bbc.co.uk,techcrunch.com',
+    language: 'en',
+    sortBy: 'relevancy'
+  }).then(response => {
+    console.log(response);
+    let data = JSON.stringify(response);
+    fs.writeFile('./articles.json', data, (err) => {
+      if (err) {
+          throw err;
+      }
+      console.log("JSON data is saved.");
+  });
+    /*
+      {
+        status: "ok",
+        articles: [...]
+      }
+    */
+  });
+  
 
   return (
     <div className="App">
